@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quick Notes</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1 class="title">📝 Quick Notes</h1>
+      </header>
+
+      <!-- Add Note Section -->
+      <div class="add-note-section">
+        <textarea
+          id="newNoteInput"
+          placeholder="Type a new note and press Enter or click Add..."
+          rows="3"
+        ></textarea>
+        <div class="url-input-section">
+          <input
+            type="url"
+            id="newNoteUrl"
+            placeholder="Optional: Add a link (e.g., https://example.com)"
+          />
+        </div>
+        <button id="addNoteBtn" class="btn btn-primary">Add Note</button>
+      </div>
+
+      <!-- Notes List -->
+      <div id="notesList" class="notes-list">
+        <!-- Notes will be dynamically inserted here -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state" style="display: none">
+        <p>📝</p>
+        <p>No notes yet!</p>
+        <p class="empty-hint">
+          Select text on any webpage, right-click, and choose "Save to Notes"
+        </p>
+      </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
