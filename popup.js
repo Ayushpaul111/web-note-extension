@@ -1,6 +1,6 @@
 /**
  * Popup UI Controller
- * Handles all UI interactions and storage updates with smooth animations
+ * Modern, clean interface for note management
  */
 
 // DOM Elements
@@ -30,6 +30,12 @@ function setupEventListeners() {
       handleAddNote();
     }
   });
+
+  // Auto-resize textarea
+  newNoteInput.addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  });
 }
 
 /**
@@ -54,7 +60,7 @@ function renderNotes(notes) {
 
   // Show empty state if no notes
   if (notes.length === 0) {
-    emptyState.style.display = "block";
+    emptyState.style.display = "flex";
     notesList.style.display = "none";
     return;
   }
@@ -65,7 +71,7 @@ function renderNotes(notes) {
   // Render each note with staggered animation
   notes.forEach((note, index) => {
     const noteElement = createNoteElement(note, index, notes.length);
-    noteElement.style.animationDelay = `${index * 0.05}s`;
+    noteElement.style.animationDelay = `${index * 0.03}s`;
     notesList.appendChild(noteElement);
   });
 }
@@ -78,13 +84,13 @@ function renderNotes(notes) {
  * @returns {HTMLElement} Note element
  */
 function createNoteElement(note, index, totalNotes) {
-  const noteDiv = document.createElement("div");
-  noteDiv.className = "note-item";
-  noteDiv.dataset.noteId = note.id;
+  const noteCard = document.createElement("div");
+  noteCard.className = "note-card";
+  noteCard.dataset.noteId = note.id;
 
-  // Truncate text to 120 characters
+  // Truncate text to 150 characters
   const displayText =
-    note.text.length > 120 ? note.text.substring(0, 120) + "..." : note.text;
+    note.text.length > 150 ? note.text.substring(0, 150) + "..." : note.text;
 
   // Format date
   const dateStr = formatDate(note.createdAt);
@@ -92,59 +98,83 @@ function createNoteElement(note, index, totalNotes) {
   // URL section
   const urlSection = note.url
     ? `
-    <div class="note-url">
-      <a href="${escapeHtml(
-        note.url
-      )}" target="_blank" class="note-link" title="${escapeHtml(note.url)}">
-        🔗 Open Source
-      </a>
-    </div>
+    <a href="${escapeHtml(
+      note.url
+    )}" target="_blank" class="note-link-badge" title="${escapeHtml(note.url)}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+      </svg>
+      Open link
+    </a>
   `
     : "";
 
-  noteDiv.innerHTML = `
-    <div class="note-content">
-      <div class="note-text">${escapeHtml(displayText)}</div>
-      ${urlSection}
-      <div class="note-date">${dateStr}</div>
-    </div>
-    <div class="note-actions">
-      <button class="btn-icon btn-edit" title="Edit" data-action="edit">
-        ✏️
-      </button>
-      <button class="btn-icon btn-delete" title="Delete" data-action="delete">
-        🗑️
-      </button>
-      <div class="note-reorder">
-        <button class="btn-icon btn-up" title="Move up" data-action="up" ${
-          index === 0 ? "disabled" : ""
-        }>
-          ▲
+  noteCard.innerHTML = `
+    <div class="note-header">
+      <div class="note-meta">${dateStr}</div>
+      <div class="note-actions">
+        <div class="note-reorder">
+          <button class="reorder-btn btn-up" title="Move up" data-action="up" ${
+            index === 0 ? "disabled" : ""
+          }>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+          <button class="reorder-btn btn-down" title="Move down" data-action="down" ${
+            index === totalNotes - 1 ? "disabled" : ""
+          }>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+        <button class="note-action-btn" title="Edit" data-action="edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
         </button>
-        <button class="btn-icon btn-down" title="Move down" data-action="down" ${
-          index === totalNotes - 1 ? "disabled" : ""
-        }>
-          ▼
+        <button class="note-action-btn delete" title="Delete" data-action="delete">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
         </button>
       </div>
     </div>
+    <div class="note-text">${escapeHtml(displayText)}</div>
+    ${urlSection}
   `;
 
   // Add event listeners
-  noteDiv
+  noteCard
     .querySelector('[data-action="edit"]')
-    .addEventListener("click", () => handleEdit(note));
-  noteDiv
+    .addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleEdit(note);
+    });
+  noteCard
     .querySelector('[data-action="delete"]')
-    .addEventListener("click", () => handleDelete(note.id));
-  noteDiv
+    .addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleDelete(note.id);
+    });
+  noteCard
     .querySelector('[data-action="up"]')
-    .addEventListener("click", () => handleMoveUp(note.id));
-  noteDiv
+    .addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleMoveUp(note.id);
+    });
+  noteCard
     .querySelector('[data-action="down"]')
-    .addEventListener("click", () => handleMoveDown(note.id));
+    .addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleMoveDown(note.id);
+    });
 
-  return noteDiv;
+  return noteCard;
 }
 
 /**
@@ -156,9 +186,9 @@ async function handleAddNote() {
 
   if (!text) {
     // Add shake animation to input
-    newNoteInput.style.animation = "shake 0.3s";
+    newNoteInput.classList.add("shake");
     setTimeout(() => {
-      newNoteInput.style.animation = "";
+      newNoteInput.classList.remove("shake");
     }, 300);
     newNoteInput.focus();
     return;
@@ -166,10 +196,10 @@ async function handleAddNote() {
 
   // Validate URL if provided
   if (url && !isValidUrl(url)) {
-    newNoteUrl.style.animation = "shake 0.3s";
-    newNoteUrl.style.borderColor = "#ef4444";
+    newNoteUrl.classList.add("shake");
+    newNoteUrl.style.borderColor = "#dc3545";
     setTimeout(() => {
-      newNoteUrl.style.animation = "";
+      newNoteUrl.classList.remove("shake");
       newNoteUrl.style.borderColor = "";
     }, 300);
     return;
@@ -188,17 +218,23 @@ async function handleAddNote() {
     await StorageHelper.addNote(newNote);
 
     // Add success feedback
-    addNoteBtn.textContent = "✓ Added!";
-    addNoteBtn.style.background =
-      "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+    const originalText = addNoteBtn.innerHTML;
+    addNoteBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>Added!</span>
+    `;
+    addNoteBtn.style.background = "#10b981";
 
     setTimeout(() => {
-      addNoteBtn.textContent = "Add Note";
+      addNoteBtn.innerHTML = originalText;
       addNoteBtn.style.background = "";
-    }, 1000);
+    }, 1200);
 
     newNoteInput.value = "";
     newNoteUrl.value = "";
+    newNoteInput.style.height = "auto";
     await loadAndRenderNotes();
     newNoteInput.focus();
   } catch (error) {
@@ -227,29 +263,35 @@ function isValidUrl(url) {
  */
 async function handleEdit(note) {
   const noteElement = document.querySelector(`[data-note-id="${note.id}"]`);
-  const noteContent = noteElement.querySelector(".note-content");
+
+  // Store original content
+  const originalContent = noteElement.innerHTML;
 
   // Create edit form
   const editForm = document.createElement("div");
   editForm.className = "note-edit-form";
   editForm.innerHTML = `
     <textarea class="edit-textarea">${escapeHtml(note.text)}</textarea>
-    <input type="url" class="edit-url" placeholder="Optional: Add or edit link" value="${escapeHtml(
+    <input type="url" class="edit-url-input" placeholder="🔗 Add or edit link" value="${escapeHtml(
       note.url || ""
     )}">
     <div class="edit-actions">
-      <button class="btn btn-primary btn-save">💾 Save</button>
-      <button class="btn btn-secondary btn-cancel">✕ Cancel</button>
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-save">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Save
+      </button>
     </div>
   `;
 
   // Replace content with edit form
-  const originalContent = noteContent.innerHTML;
-  noteContent.innerHTML = "";
-  noteContent.appendChild(editForm);
+  noteElement.innerHTML = "";
+  noteElement.appendChild(editForm);
 
   const textarea = editForm.querySelector(".edit-textarea");
-  const urlInput = editForm.querySelector(".edit-url");
+  const urlInput = editForm.querySelector(".edit-url-input");
   const saveBtn = editForm.querySelector(".btn-save");
   const cancelBtn = editForm.querySelector(".btn-cancel");
 
@@ -257,25 +299,33 @@ async function handleEdit(note) {
   textarea.focus();
   textarea.select();
 
+  // Auto-resize textarea
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+  textarea.addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  });
+
   // Save handler
   saveBtn.addEventListener("click", async () => {
     const newText = textarea.value.trim();
     const newUrl = urlInput.value.trim();
 
     if (!newText) {
-      textarea.style.animation = "shake 0.3s";
+      textarea.classList.add("shake");
       setTimeout(() => {
-        textarea.style.animation = "";
+        textarea.classList.remove("shake");
       }, 300);
       return;
     }
 
     // Validate URL if provided
     if (newUrl && !isValidUrl(newUrl)) {
-      urlInput.style.animation = "shake 0.3s";
-      urlInput.style.borderColor = "#ef4444";
+      urlInput.classList.add("shake");
+      urlInput.style.borderColor = "#dc3545";
       setTimeout(() => {
-        urlInput.style.animation = "";
+        urlInput.classList.remove("shake");
         urlInput.style.borderColor = "";
       }, 300);
       return;
@@ -292,7 +342,9 @@ async function handleEdit(note) {
 
   // Cancel handler
   cancelBtn.addEventListener("click", () => {
-    noteContent.innerHTML = originalContent;
+    noteElement.innerHTML = originalContent;
+    // Re-attach event listeners
+    setupNoteEventListeners(noteElement, note);
   });
 
   // Save on Ctrl+Enter or Cmd+Enter
@@ -304,6 +356,36 @@ async function handleEdit(note) {
       cancelBtn.click();
     }
   });
+}
+
+/**
+ * Setup event listeners for a note element
+ */
+function setupNoteEventListeners(noteElement, note) {
+  noteElement
+    .querySelector('[data-action="edit"]')
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleEdit(note);
+    });
+  noteElement
+    .querySelector('[data-action="delete"]')
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleDelete(note.id);
+    });
+  noteElement
+    .querySelector('[data-action="up"]')
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleMoveUp(note.id);
+    });
+  noteElement
+    .querySelector('[data-action="down"]')
+    ?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleMoveDown(note.id);
+    });
 }
 
 /**
@@ -369,9 +451,10 @@ function formatDate(timestamp) {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
 
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -390,14 +473,3 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
-
-// Add shake animation for validation feedback
-const style = document.createElement("style");
-style.textContent = `
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-  }
-`;
-document.head.appendChild(style);

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Quick Note Taker",
+  "name": "Web Note",
   "version": "1.0.0",
-  "description": "Save selected text as notes with a right-click. Organize, edit, and manage your notes easily.",
+  "description": "Save selected text on any webpage with one click and save it instantly. Organize, edit, and manage your notes easily.",
   "permissions": ["storage", "contextMenus"],
   "content_scripts": [
     {
