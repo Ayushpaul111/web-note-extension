@@ -21,22 +21,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 // Handle messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("Background received message:", request);
-
   if (request.action === "saveNote" && request.text) {
-    // Handle async operation
-    saveNoteFromText(request.text, request.url)
-      .then(() => {
-        console.log("Note saved successfully from content script");
+    // Handle async operation properly
+    (async () => {
+      try {
+        await saveNoteFromText(request.text, request.url);
         sendResponse({ success: true });
-      })
-      .catch((error) => {
-        console.error("Error saving note from content script:", error);
+      } catch (error) {
         sendResponse({ success: false, error: error.message });
-      });
+      }
+    })();
 
-    // Return true to indicate async response
-    return true;
+    return true; // Keep message channel open for async response
   }
 });
 
