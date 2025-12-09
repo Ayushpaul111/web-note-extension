@@ -86,6 +86,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -100,10 +101,13 @@
 }
 
 .quick-note-modal-content {
-  background: #1a1f2e;
+  background: #1f2937;
   border-radius: 16px;
-  width: 90%;
-  max-width: 520px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: 
     0 24px 48px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -123,13 +127,14 @@
 }
 
 .quick-note-modal-header {
-  background: #252d3d;
+  background: #111827;
   color: white;
-  padding: 20px 24px;
+  padding: 18px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #374151;
+  flex-shrink: 0;
 }
 
 .quick-note-modal-header h3 {
@@ -138,6 +143,9 @@
   font-weight: 600;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #f9fafb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .quick-note-modal-close {
@@ -153,6 +161,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .quick-note-modal-close:hover {
@@ -163,6 +172,25 @@
 .quick-note-modal-body {
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.quick-note-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.quick-note-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-note-modal-body::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+.quick-note-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .quick-note-preview {
@@ -170,39 +198,54 @@
 }
 
 .quick-note-preview-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #9ca3af;
   margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
-.quick-note-preview-text {
-  background: #0f1419;
-  padding: 14px;
-  border-radius: 8px;
+.quick-note-preview-textarea {
+  width: 100%;
+  background: #111827;
+  padding: 14px 16px;
+  border-radius: 10px;
   color: #e5e7eb;
   line-height: 1.6;
-  font-size: 14px;
-  max-height: 150px;
-  overflow-y: auto;
-  word-wrap: break-word;
-  border: 1px solid #374151;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border: 2px solid #374151;
+  resize: vertical;
+  min-height: 140px;
+  max-height: 320px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.quick-note-preview-text::-webkit-scrollbar {
-  width: 6px;
+.quick-note-preview-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background: #0f172a;
 }
 
-.quick-note-preview-text::-webkit-scrollbar-track {
-  background: #1a1f2e;
-  border-radius: 3px;
+.quick-note-preview-textarea::-webkit-scrollbar {
+  width: 8px;
 }
 
-.quick-note-preview-text::-webkit-scrollbar-thumb {
+.quick-note-preview-textarea::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.quick-note-preview-textarea::-webkit-scrollbar-thumb {
   background: #374151;
-  border-radius: 3px;
+  border-radius: 4px;
+}
+
+.quick-note-preview-textarea::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 
 .quick-note-url-option {
@@ -216,13 +259,13 @@
   cursor: pointer;
   user-select: none;
   margin-bottom: 12px;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 10px;
+  border-radius: 8px;
   transition: background 0.2s;
 }
 
 .quick-note-checkbox:hover {
-  background: rgba(96, 165, 250, 0.05);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .quick-note-checkbox input[type="checkbox"] {
@@ -231,6 +274,7 @@
   margin-right: 10px;
   cursor: pointer;
   accent-color: #3b82f6;
+  flex-shrink: 0;
 }
 
 .quick-note-checkbox span {
@@ -240,28 +284,44 @@
 }
 
 .quick-note-url-display {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 12px 14px;
   border-radius: 8px;
   font-size: 12px;
   color: #60a5fa;
   word-break: break-all;
-  line-height: 1.5;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  line-height: 1.6;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.quick-note-url-display::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quick-note-url-display::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-note-url-display::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
 }
 
 .quick-note-modal-footer {
   padding: 16px 24px;
-  background: #252d3d;
+  background: #111827;
   display: flex;
   gap: 12px;
   justify-content: flex-end;
   border-top: 1px solid #374151;
+  flex-shrink: 0;
 }
 
 .quick-note-btn {
-  padding: 11px 24px;
+  padding: 12px 24px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -269,6 +329,21 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.quick-note-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.quick-note-btn .btn-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
 }
 
 .quick-note-btn-primary {
@@ -277,10 +352,20 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.quick-note-btn-primary:hover {
+.quick-note-btn-primary:not(:disabled):hover {
   background: #2563eb;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
+}
+
+.quick-note-btn-primary.saving {
+  background: #6366f1;
+  pointer-events: none;
+}
+
+.quick-note-btn-primary.saved {
+  background: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .quick-note-btn-secondary {
@@ -292,4 +377,64 @@
 .quick-note-btn-secondary:hover {
   background: #4b5563;
   transform: translateY(-1px);
+}
+
+/* Spinner animation for saving state */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Shake animation for validation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.shake {
+  animation: shake 0.3s ease;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  #quick-note-modal {
+    padding: 12px;
+  }
+
+  .quick-note-modal-content {
+    max-height: 95vh;
+  }
+
+  .quick-note-modal-header {
+    padding: 16px 20px;
+  }
+
+  .quick-note-modal-header h3 {
+    font-size: 16px;
+  }
+
+  .quick-note-modal-body {
+    padding: 20px;
+  }
+
+  .quick-note-preview-textarea {
+    font-size: 14px;
+    min-height: 120px;
+  }
+
+  .quick-note-modal-footer {
+    padding: 14px 20px;
+    flex-direction: column;
+  }
+
+  .quick-note-btn {
+    width: 100%;
+    padding: 12px 20px;
+  }
 }
