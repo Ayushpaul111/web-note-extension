@@ -60,8 +60,8 @@ function createSelectionModal() {
       </div>
       <div class="quick-note-modal-body">
         <div class="quick-note-preview">
-          <div class="quick-note-preview-label">Edit your note:</div>
-          <textarea class="quick-note-preview-textarea" rows="6"></textarea>
+          <div class="quick-note-preview-label">Selected Text:</div>
+          <div class="quick-note-preview-text"></div>
         </div>
         <div class="quick-note-url-option">
           <label class="quick-note-checkbox">
@@ -73,16 +73,7 @@ function createSelectionModal() {
       </div>
       <div class="quick-note-modal-footer">
         <button class="quick-note-btn quick-note-btn-secondary quick-note-cancel">Cancel</button>
-        <button class="quick-note-btn quick-note-btn-primary quick-note-save">
-          <span class="btn-content">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-              <polyline points="17 21 17 13 7 13 7 21"></polyline>
-              <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-            <span>Save Note</span>
-          </span>
-        </button>
+        <button class="quick-note-btn quick-note-btn-primary quick-note-save">Save Note</button>
       </div>
     </div>
   `;
@@ -116,13 +107,6 @@ function createSelectionModal() {
       );
       urlDisplay.style.display = e.target.checked ? "block" : "none";
     });
-
-  // Auto-resize textarea
-  const textarea = selectionModal.querySelector(".quick-note-preview-textarea");
-  textarea.addEventListener("input", (e) => {
-    e.target.style.height = "auto";
-    e.target.style.height = e.target.scrollHeight + "px";
-  });
 }
 
 /**
@@ -142,7 +126,6 @@ function setupSelectionListeners() {
         const selection = window.getSelection();
         if (!selection || selection.toString().trim().length === 0) {
           hideIcon();
-          currentSelection = null;
         }
       }, 10);
     }
@@ -168,7 +151,6 @@ function setupSelectionListeners() {
   // Hide icon when window loses focus
   window.addEventListener("blur", () => {
     hideIcon();
-    currentSelection = null;
   });
 }
 
@@ -194,8 +176,6 @@ function handleTextSelection(e) {
       showIconForSelection();
     } else {
       hideIcon();
-      currentSelection = null;
-      currentUrl = null;
     }
   }, 10);
 }
@@ -212,8 +192,6 @@ function handleSelectionChange() {
       const sel = window.getSelection();
       if (!sel || sel.toString().trim().length === 0) {
         hideIcon();
-        currentSelection = null;
-        currentUrl = null;
       }
     }, 50);
   }
@@ -281,15 +259,19 @@ function hideIcon() {
  */
 function showModal() {
   // Populate modal with current selection
-  const previewTextarea = selectionModal.querySelector(
-    ".quick-note-preview-textarea"
-  );
+  const previewText = selectionModal.querySelector(".quick-note-preview-text");
   const urlDisplay = selectionModal.querySelector(".quick-note-url-display");
   const includeUrlCheckbox = selectionModal.querySelector(
     "#quick-note-include-url"
   );
 
-  previewTextarea.value = currentSelection;
+  // Truncate long text
+  const displayText =
+    currentSelection.length > 200
+      ? currentSelection.substring(0, 200) + "..."
+      : currentSelection;
+
+  previewText.textContent = displayText;
   urlDisplay.textContent = currentUrl;
   includeUrlCheckbox.checked = true;
   urlDisplay.style.display = "block";
@@ -297,17 +279,6 @@ function showModal() {
   // Show modal
   selectionModal.classList.remove("quick-note-modal-hidden");
   selectionModal.classList.add("quick-note-modal-visible");
-
-  // Auto-resize textarea and focus
-  setTimeout(() => {
-    previewTextarea.style.height = "auto";
-    previewTextarea.style.height = previewTextarea.scrollHeight + "px";
-    previewTextarea.focus();
-    previewTextarea.setSelectionRange(
-      previewTextarea.value.length,
-      previewTextarea.value.length
-    );
-  }, 100);
 }
 
 /**
@@ -324,24 +295,12 @@ function hideModal() {
   }
 
   hideIcon();
-  currentSelection = null;
-  currentUrl = null;
 
-  // Reset button state
+  // Clear stored data after a delay to ensure save completes
   setTimeout(() => {
-    const saveBtn = selectionModal.querySelector(".quick-note-save");
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("saving", "saved");
-    const btnContent = saveBtn.querySelector(".btn-content");
-    btnContent.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-        <polyline points="7 3 7 8 15 8"></polyline>
-      </svg>
-      <span>Save Note</span>
-    `;
-  }, 300);
+    currentSelection = null;
+    currentUrl = null;
+  }, 100);
 }
 
 /**
@@ -351,8 +310,8 @@ function handleIconClick(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  if (!currentSelection) {
-    console.log("No text selected");
+  if (!currentSelection || !currentUrl) {
+    console.log("No text selected or URL missing");
     hideIcon();
     return;
   }
@@ -366,73 +325,50 @@ function handleIconClick(e) {
  * Handle save from modal
  */
 async function handleSaveFromModal() {
-  const previewTextarea = selectionModal.querySelector(
-    ".quick-note-preview-textarea"
-  );
-  const editedText = previewTextarea.value.trim();
-
-  if (!editedText) {
-    previewTextarea.classList.add("shake");
-    setTimeout(() => {
-      previewTextarea.classList.remove("shake");
-    }, 300);
-    previewTextarea.focus();
-    return;
-  }
-
+  // Capture values immediately
+  const textToSave = currentSelection;
+  const urlToSave = currentUrl;
   const includeUrl = selectionModal.querySelector(
     "#quick-note-include-url"
   ).checked;
-  const urlToSave = includeUrl ? currentUrl : null;
+
+  const finalUrl = includeUrl ? urlToSave : null;
+
+  if (!textToSave) {
+    console.error("No text to save");
+    hideModal();
+    return;
+  }
 
   try {
+    // Add success animation to modal
     const saveBtn = selectionModal.querySelector(".quick-note-save");
-    const btnContent = saveBtn.querySelector(".btn-content");
-
-    // Disable button and show saving state
-    saveBtn.disabled = true;
-    saveBtn.classList.add("saving");
-
-    // Saving animation
-    btnContent.innerHTML = `
-      <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
-        <path d="M12 2 A10 10 0 0 1 22 12" opacity="1"></path>
-      </svg>
-      <span>Saving...</span>
-    `;
+    saveBtn.textContent = "✓ Saved!";
+    saveBtn.style.background =
+      "linear-gradient(135deg, #10b981 0%, #059669 100%)";
 
     // Send message to background script to save note
     chrome.runtime.sendMessage(
       {
         action: "saveNote",
-        text: editedText,
-        url: urlToSave,
+        text: textToSave,
+        url: finalUrl,
       },
       (response) => {
         if (chrome.runtime.lastError) {
           console.error("Error sending message:", chrome.runtime.lastError);
-          saveBtn.disabled = false;
-          saveBtn.classList.remove("saving");
-          return;
+        } else {
+          console.log("Note saved successfully", response);
         }
-
-        // Success state
-        saveBtn.classList.remove("saving");
-        saveBtn.classList.add("saved");
-        btnContent.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <span>Saved!</span>
-        `;
-
-        // Hide modal after delay
-        setTimeout(() => {
-          hideModal();
-        }, 1000);
       }
     );
+
+    // Hide modal after short delay
+    setTimeout(() => {
+      hideModal();
+      saveBtn.textContent = "Save Note";
+      saveBtn.style.background = "";
+    }, 800);
   } catch (error) {
     console.error("Error in handleSaveFromModal:", error);
   }
